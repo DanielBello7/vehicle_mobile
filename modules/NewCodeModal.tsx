@@ -6,10 +6,20 @@ import { FontAwesome5, AntDesign } from '@expo/vector-icons';
 import { Modal, SafeAreaView, View, Text, StatusBar, StyleSheet, TouchableOpacity } from "react-native";
 import { SIZES, TEXT } from "../constants";
 import { useData } from '../context';
+import QRCode from 'react-qr-code';
 
 type NewCodeModalProps = {
+  data: string,
   isVisible: boolean,
   setVisible: React.Dispatch<React.SetStateAction<boolean>>
+}
+
+type CodeBoxProps = {
+  data: string
+}
+
+type OverlayProps = {
+  data: string
 }
 
 type BackButtonProps = {
@@ -38,7 +48,7 @@ function Header({HeaderFunction}: HeaderProps) {
   )
 }
 
-function Overlay() {
+function Overlay({data}: OverlayProps) {
   const { theme } = useData();
 
   return (
@@ -51,7 +61,8 @@ function Overlay() {
     <View style={{...styles.box4, ...styles.overlay_generic, borderColor: theme.main}}/>
 
     <View style={styles.img_box}>
-    <AntDesign name="qrcode" size={300}/>
+    <QRCode value={data} title="VVApp" />
+    {/* <AntDesign name="qrcode" size={300}/> */}
     </View>
 
   </View>
@@ -59,7 +70,7 @@ function Overlay() {
   )
 }
 
-function CodeBox() {
+function CodeBox({data}: CodeBoxProps) {
   return (
   <View style={styles.code_box}>
   <Text style={styles.info_text}>
@@ -68,12 +79,12 @@ function CodeBox() {
   elit. Voluptas voluptatum 
   </Text>
 
-  <Overlay />
+  <Overlay data={data} />
   </View>
   )
 }
 
-export default function NewCodeModal({isVisible, setVisible}: NewCodeModalProps) {
+export default function NewCodeModal({isVisible, setVisible, data}: NewCodeModalProps) {
   const { theme } = useData();
 
   return (
@@ -85,7 +96,7 @@ export default function NewCodeModal({isVisible, setVisible}: NewCodeModalProps)
     <Header HeaderFunction={() => setVisible(false)}/>
 
     <View style={styles.sub}>
-    <CodeBox />
+    <CodeBox data={data} />
     </View>
 
   </SafeAreaView>

@@ -14,7 +14,13 @@ type ContextDataType = {
   setUser: React.Dispatch<React.SetStateAction<UserDataType | null>>,
 
   theme: THEME_TYPE,
-  setTheme: React.Dispatch<React.SetStateAction<boolean>>
+  setTheme: React.Dispatch<React.SetStateAction<boolean>>,
+
+  data: string,
+  setData: React.Dispatch<React.SetStateAction<string>>,
+
+  hasData: boolean,
+  setHasData: React.Dispatch<React.SetStateAction<boolean>>,
 }
 
 const Context = React.createContext({} as ContextDataType);
@@ -28,13 +34,23 @@ function ContextProvider(props: ContextProps) {
 
   const [isDarkTheme, setTheme] = useState(false);
 
+  const [data, setData] = useState("");
+
+  const [hasData, setHasData] = useState(false);
+
   return (
   <Context.Provider value={{
     user,
     setUser,
 
     theme: isDarkTheme ? DARK_THEME : LIGHT_THEME,
-    setTheme
+    setTheme,
+
+    data,
+    setData,
+
+    hasData,
+    setHasData
   }}>
     {props.children}
   </Context.Provider>

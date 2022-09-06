@@ -1,7 +1,7 @@
 
 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, TouchableOpacity } from "react-native";
 import { SIZES, TEXT } from "../constants";
 import { FontAwesome } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ import { useNavigation } from "@react-navigation/native";
 import InputGroup from '../components/InputGroup';
 import SubmitButton from "../components/SubmitButton";
 import Error from "../components/Error";
+
 
 function GoogleBtn() {
   return (
@@ -19,13 +20,43 @@ function GoogleBtn() {
   )
 }
 
-
 export default function SignInScreen() {
   const navigation = useNavigation();
 
-  const [error, setError] = useState({msg: "Error: Value currently unavailable.", show: false});
+  const [isLoading, setLoading] = useState(false);
+
+  const [email, setEmail] = useState("");
+
+  const [password, setPassword] = useState("");
+
+  const [error, setError] = useState({msg: "Value currently unavailable.", show: false});
   
   const HandleNavigation = () => navigation.navigate("Sign-Up" as never);
+
+  const clearForm = () => {
+    setEmail("");
+    return setPassword("");
+  }
+
+  const HandleSubmit = () => {
+    if (!email.trim() || !password.trim()) 
+      return setError({msg: "Please fill in the required information.", show: true});
+
+    setLoading(true);
+    
+    setTimeout(() => {
+      console.log({email, password});
+      setLoading(false);
+      clearForm();
+    }, 5000);
+
+    return setError({msg: "", show: false});
+  }
+
+  useEffect(() => {
+    const timeoutID = setTimeout(() => setError({msg: error.msg, show: false}), 5000);
+    return () => clearTimeout(timeoutID);
+  }, [error.show]);
 
   return (
   <React.Fragment>
@@ -47,13 +78,31 @@ export default function SignInScreen() {
     {error.show && <Error msg={error.msg}/>}
 
     <View style={styles.group}>
-    <InputGroup title="Email"/>
-    <InputGroup title="Password"/>
-    <InputGroup title="Confirm Password"/>
+    <InputGroup title="Email" 
+                keyType="email-address" 
+                setValue={setEmail} 
+                secure={false}
+                textContent="emailAddress"
+                disabled={isLoading}
+                value={email}
+                />
+    <InputGroup title="Password"
+                keyType="default"
+                setValue={setPassword}
+                textContent="password"
+                disabled={isLoading}
+                value={password}
+                secure
+                />
     </View>
 
     <View style={styles.btn_box}>
-    <SubmitButton title="Sign In"/>
+    <SubmitButton title="Sign In" 
+                  press={HandleSubmit} 
+                  isLoading={isLoading} 
+                  color="black"
+                  txtColor="white"
+                  />
     <GoogleBtn />
     </View>
 

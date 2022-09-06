@@ -4,15 +4,36 @@
 import { StyleSheet, View, Text, TextInput } from 'react-native';
 import { SIZES, TEXT } from '../constants';
 
+
 type InputGroupProps = {
-  title: string
+  title: string,
+  value: string,
+  secure: boolean,
+  disabled: boolean
+  keyType: "email-address" | "default",
+  textContent: "password" | "emailAddress" | "none"
+  setValue: React.Dispatch<React.SetStateAction<string>>
 }
 
-export default function InputGroup({title}: InputGroupProps) {
+export default function InputGroup({title, secure, setValue, value, keyType, textContent, disabled}: InputGroupProps) {
   return (
   <View style={styles.input_group}>
   <Text>{title}</Text>
-  <TextInput style={styles.input} placeholder={title}/>
+  <TextInput style={styles.input} 
+             placeholder={title} 
+             value={value}
+             onChangeText={text => setValue(text)}
+             autoCapitalize="none"
+             keyboardType={keyType}
+             editable={!disabled ? true : false}
+             autoComplete="off"
+             autoCorrect={false}
+             secureTextEntry={secure}
+             autoFocus={false}
+             returnKeyType="done"
+             textContentType={textContent}
+             clearButtonMode="always"
+             />
   </View>
   )
 }

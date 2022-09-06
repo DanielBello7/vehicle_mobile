@@ -13,7 +13,7 @@ export default function Error({msg}: ErrorProps) {
   return (
   <View style={styles.error_box}>
   <Ionicons name="information-circle-outline" size={20} color="red"/>
-  <Text style={styles.error}>{msg}</Text>
+  <Text style={styles.error}>Error: {msg}</Text>
   </View>
   );
 }

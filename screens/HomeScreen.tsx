@@ -1,15 +1,23 @@
 
 
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableOpacity } from "react-native";
 import { TEXT, SIZES } from '../constants';
 import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from '@expo/vector-icons';
 import { useData } from '../context';
+import { getCameraPermissionsAsync, requestCameraPermissionsAsync } from 'expo-camera';
+import CameraModal from '../modules/CameraModal';
+import Error from '../components/Error';
 
 type ScanButtonProps = {
   press: Function
+}
+
+type ScannedType = {
+  gotten: boolean, 
+  data: string | null
 }
 
 function TitleBlock() {
@@ -60,17 +68,43 @@ function ScanButton({press}: ScanButtonProps) {
 }
 
 export default function HomeScreen() {
-  const [scanned, setScanned] = useState<{} | null>(null);
+  const {hasData} = useData();
+
+  const [cameraPermission, setCameraPermission] = useState(false);
+
+  const [error, setError] = useState({msg: "", show: false});
+
+  const [showModal, setShowModal] = useState(false);
 
   const navigation = useNavigation();
 
-  const HandleNavigation = () => {
-    return navigation.navigate(
-      "Results" as never, 
-      `Results-${Math.random().toString()}` as never, 
-      scanned as never
-    );
+  const HandleNavigation = () => navigation.navigate("Results" as never);
+
+  const HandleScan = () => {
+    if (!cameraPermission) return setError({msg: "Camera permissions required", show: true});
+    return setShowModal(true);
   }
+
+  const GetCameraPermissions = async () => {
+    const permission = await getCameraPermissionsAsync();
+    if (permission.status === "granted") return setCameraPermission(true);
+    const getPermission = await requestCameraPermissionsAsync();
+    if (getPermission.status === "granted") return setCameraPermission(true);
+    return setCameraPermission(false);
+  }
+
+  useEffect(() => {
+    if (hasData) return HandleNavigation();
+  }, [hasData]);
+
+  useEffect(() => {
+    const timeoutID = setTimeout(() => setError({msg: error.msg, show: false}), 5000);
+    return () => clearTimeout(timeoutID);
+  }, [error.show]);
+
+  useEffect(() => {
+    GetCameraPermissions();
+  }, []);
 
   return (
   <React.Fragment>
@@ -78,14 +112,26 @@ export default function HomeScreen() {
   <SafeAreaView style={styles.main}>
   <View style={styles.sub}>
     
+    {
+      error.show &&
+      <View style={{paddingHorizontal: SIZES.extraLarge}}>
+      <Error msg={error.msg} />
+      </View>
+    }
+
     <TitleBlock />
 
     <Overlay />
 
-    <ScanButton press={HandleNavigation}/>
+    <ScanButton press={HandleScan}/>
 
+    
   </View>
   </SafeAreaView>
+  {
+    cameraPermission && 
+    <CameraModal setShow={setShowModal} show={showModal} />
+  }
   </React.Fragment>
   );
 }
@@ -142,7 +188,7 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   overlay_generic: {
-    borderWidth: 5,
+    borderWidth: 8,
     width: 25,
     height: 25,
     position: "absolute"

@@ -1,68 +1,140 @@
 
 
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, StatusBar, Image, ScrollView } from "react-native";
-import { SIZES, TEXT, assets } from "../constants";
-import { AntDesign } from '@expo/vector-icons';
+import { SIZES, TEXT } from "../constants";
+import { AntDesign, FontAwesome } from '@expo/vector-icons';
+import { useData } from '../context';
+import { VehicleDataType } from "../global.types";
+import QRCode from 'react-qr-code';
 
 type DetailValueProps = {
   title: string,
   value: string  
 }
 
-function Profile() {
+type ValidDetailsProps = {
+  data: VehicleDataType
+}
+
+type ProfileProps = {
+  data: VehicleDataType
+}
+
+type CodeProps = {
+  data: string
+}
+
+type DetailsProps = {
+  data: VehicleDataType
+}
+
+function Profile({ data }: ProfileProps) {
+  const { theme } = useData();
+
   return (
   <View style={styles.profile}>
   <View style={styles.img_box}>
-    <Image source={assets.user} style={styles.img} resizeMode="contain" />
+    {
+      data.img && data.img.trim() 
+      ? <Image source={{uri: data.img}} style={styles.img} resizeMode="contain" />
+      : <FontAwesome name="user-circle" size={70}/>
+    }
+  
   </View>
-  <Text style={styles.name}>Mark Jordan</Text>
-  <Text style={styles.validation}>Verified User</Text>
+  <Text style={styles.name}>{`${data.firstname} ${data.lastname}`}</Text>
+  <Text style={{...styles.validation, color: theme.main}}>
+  {data.isVerified ? "Verified User" : "Unverified User"}
+  </Text>
   </View>
   )
 }
 
-function Code() {
+function Code({data}: CodeProps) {
   return (
   <View style={styles.code_box}>
   <View style={styles.qr_box}>
-  <AntDesign name="qrcode" size={150}/>
+  <QRCode value={data} title="VVApp" size={150}/>
+  {/* <AntDesign name="qrcode" size={150}/> */}
   </View>
   </View>
   )
 }
 
 function DetailValue({title, value}: DetailValueProps) {
+  const { theme } = useData();
+
   return (
   <View style={styles.detail_value_box}>
   <Text style={styles.name}>{value}</Text>
-  <Text style={styles.validation}>{title}</Text>
+  <Text style={{...styles.validation, color: theme.main}}>{title}</Text>
   </View>
   )
 }
 
-function Details() {
+function Details({data}: DetailsProps) {
   return (
   <View style={styles.details_box}>
-  <DetailValue title="Validation Number" value="AUAOUB-AOUBEX-213A-E" />
-  <DetailValue title="Full Name" value="Mark Jordan" />
-  <DetailValue title="License Plate" value="AXD-HJI-2239" />
-  <DetailValue title="Email" value="mark@gmail.com" />
+  <DetailValue title="Validation Number" value={data._id} />
+  <DetailValue title="Full Name" value={`${data.firstname} ${data.lastname}`} />
+  <DetailValue title="License Plate" value={data.license} />
+  <DetailValue title="Email" value={data.email} />
+  </View>
+  )
+}
+
+function InvalidCode() {
+  return (
+  <View style={styles.warning}>
+  <AntDesign name="warning" size={120} color="red"/>
+  <Text style={styles.warning_text}>
+    Oops. The code you provided is 
+    either unregistered or 
+    invalid. Please provide another.
+  </Text> 
+  </View>
+  )
+}
+
+function ValidDetails({data}: ValidDetailsProps) {
+  return (
+  <View style={{width: "100%"}}>
+  <Profile data={data}/>
+  <Code data={JSON.stringify(data)}/>
+  <Details data={data}/>
   </View>
   )
 }
 
 export default function MoreDetailsScreen() {
+
+  const {hasData, data, setHasData} = useData();
+
+  const [current, setCurrent] = useState<VehicleDataType | null>(null);
+
+  const Conversion = () => {
+    try {
+      const result = JSON.parse(data);
+      return setCurrent(result);
+    }
+    catch (error) {
+      return setCurrent(null);
+    }
+  }
+
+  useEffect(() => {
+    Conversion();
+    if (hasData) return setHasData(false);
+  }, []);
+
   return (
   <React.Fragment>
   <StatusBar barStyle="light-content" />
   <ScrollView style={styles.main} showsVerticalScrollIndicator={false}>
 
-    <Profile />
-    <Code />
-    <Details />
-
+    { !current ? <InvalidCode /> : <ValidDetails data={current}/> }    
+    
   </ScrollView>
   </React.Fragment>
   );
@@ -98,7 +170,8 @@ const styles = StyleSheet.create({
   },
   img: {
     width: "100%",
-    height: "100%"
+    height: "100%",
+    backgroundColor: "black"
   },
   code_box: {
     width: "100%",
@@ -118,5 +191,19 @@ const styles = StyleSheet.create({
   },
   last: {
     height: 100
+  },
+  warning: {
+    width: "100%", 
+    alignItems: "center", 
+    justifyContent: "center",
+    paddingHorizontal: SIZES.large,
+    marginTop: SIZES.massive
+  },
+  warning_text: {
+    fontSize: TEXT.large, 
+    fontWeight: "bold", 
+    letterSpacing: -2.5,
+    textAlign: "center",
+    marginTop: SIZES.massive
   }
 });
