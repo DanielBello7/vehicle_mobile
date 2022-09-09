@@ -43,7 +43,7 @@ export default function CameraModal(props: CameraModalProps) {
     if (gotten) return;
     setGotten(true);
     try {
-      const result = CryptoJS.AES.decrypt(event.data, REACT_APP_ENCRYPTION_KEY as string).toString(CryptoJS.enc.Utf8); 
+      const result = CryptoJS.AES.decrypt(event.data, REACT_APP_ENCRYPTION_KEY as string).toString(CryptoJS.enc.Utf8);
       setData(result);
       setHasData(true);
       return setShow(false);

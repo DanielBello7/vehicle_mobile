@@ -8,6 +8,7 @@ import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { useData } from '../context';
 import { VehicleDataType } from "../global.types";
 import QRCode from 'react-qr-code';
+import Spinner from '../components/Spinner';
 
 type DetailValueProps = {
   title: string,
@@ -30,7 +31,13 @@ type DetailsProps = {
   data: VehicleDataType
 }
 
-function Profile({ data }: ProfileProps) {
+function FirstCap(text: string) {
+  const first = text[0].toUpperCase();
+  const remaining = text.slice(1, text.length);
+  return first + remaining;
+}
+
+function Profile({data}: ProfileProps) {
   const { theme } = useData();
 
   return (
@@ -43,7 +50,7 @@ function Profile({ data }: ProfileProps) {
     }
   
   </View>
-  <Text style={styles.name}>{`${data.firstname} ${data.lastname}`}</Text>
+  <Text style={styles.name}>{`${FirstCap(data.firstname)} ${FirstCap(data.lastname)}`}</Text>
   <Text style={{...styles.validation, color: theme.main}}>
   {data.isVerified ? "Verified User" : "Unverified User"}
   </Text>
@@ -77,8 +84,8 @@ function Details({data}: DetailsProps) {
   return (
   <View style={styles.details_box}>
   <DetailValue title="Validation Number" value={data._id} />
-  <DetailValue title="Full Name" value={`${data.firstname} ${data.lastname}`} />
-  <DetailValue title="License Plate" value={data.license} />
+  <DetailValue title="Full Name" value={`${FirstCap(data.firstname)} ${FirstCap(data.lastname)}`} />
+  <DetailValue title="License Plate" value={data.license.toUpperCase()} />
   <DetailValue title="Email" value={data.email} />
   </View>
   )
@@ -109,17 +116,35 @@ function ValidDetails({data}: ValidDetailsProps) {
 
 export default function MoreDetailsScreen() {
 
-  const {hasData, data, setHasData} = useData();
+  const {hasData, data, setHasData, axios, theme} = useData();
+
+  const [isLoading, setLoading] = useState(true);
 
   const [current, setCurrent] = useState<VehicleDataType | null>(null);
 
-  const Conversion = () => {
+  const Conversion = async () => {
+    setLoading(true);
+
+    const controller = new AbortController();
+
+    setTimeout(() => controller.abort(), 10000);
+
     try {
       const result = JSON.parse(data);
-      return setCurrent(result);
+
+      const check = await axios.get(`/registered/confirmation/${result._id}`, {signal: controller.signal});
+
+      if (!check.data.found) {
+        setCurrent(null);
+        return setLoading(false);
+      }
+
+      setCurrent(result);
+      return setLoading(false);
     }
     catch (error) {
-      return setCurrent(null);
+      setCurrent(null);
+      return setLoading(false);
     }
   }
 
@@ -133,7 +158,13 @@ export default function MoreDetailsScreen() {
   <StatusBar barStyle="light-content" />
   <ScrollView style={styles.main} showsVerticalScrollIndicator={false}>
 
-    { !current ? <InvalidCode /> : <ValidDetails data={current}/> }    
+    { 
+      isLoading ? 
+      <View style={styles.cont}>
+      <Spinner color={theme.main} size={36}/>
+      </View> 
+      : !current ? <InvalidCode /> : <ValidDetails data={current}/> 
+    }
     
   </ScrollView>
   </React.Fragment>
@@ -161,7 +192,8 @@ const styles = StyleSheet.create({
   },
   name: {
     fontWeight: "bold",
-    fontSize: TEXT.small
+    fontSize: TEXT.small,
+    textAlign: "center"
   },
   validation: {
     color: "#2196F3",
@@ -205,5 +237,11 @@ const styles = StyleSheet.create({
     letterSpacing: -2.5,
     textAlign: "center",
     marginTop: SIZES.massive
+  },
+  cont: {
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: SIZES.massive,
+    paddingTop: SIZES.massive
   }
 });

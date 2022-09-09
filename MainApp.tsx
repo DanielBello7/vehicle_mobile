@@ -7,6 +7,6 @@ import { useData } from "./context";
 
 export default function MainApp() {
   const {user} = useData();
-  if (user) return <AuthNavigation />
+  if (!user) return <AuthNavigation />
   return <MainNavigation />
 }

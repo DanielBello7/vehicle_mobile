@@ -6,14 +6,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { SIZES } from '../constants';
 
 type ErrorProps = {
-  msg: string
+  msg: string,
+  isError?: boolean
 }
 
-export default function Error({msg}: ErrorProps) {
+export default function Error({msg, isError = true}: ErrorProps) {
   return (
   <View style={styles.error_box}>
-  <Ionicons name="information-circle-outline" size={20} color="red"/>
-  <Text style={styles.error}>Error: {msg}</Text>
+  <Ionicons name="information-circle-outline" size={20} color={isError ? "red" : "green"}/>
+  <Text style={{...styles.error, color: isError ? "red": "green"}}>
+    {isError ? "Error:" : "Info:"} {msg}
+  </Text>
   </View>
   );
 }

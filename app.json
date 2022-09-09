@@ -11,6 +11,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "scheme": "VVApp",
+    "expo": {
+      "scheme": "VVApp"
+    },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
@@ -18,7 +22,7 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false
     },
     "android": {
       "adaptiveIcon": {

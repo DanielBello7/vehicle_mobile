@@ -3,33 +3,30 @@
 
 import React, { useState, useEffect } from "react";
 import { View, Text, SafeAreaView, StatusBar, StyleSheet, TouchableWithoutFeedback, Keyboard, KeyboardAvoidingView, TouchableOpacity } from "react-native";
-import { SIZES, TEXT } from "../constants";
-import { FontAwesome } from '@expo/vector-icons';
+import { SIZES } from "../constants";
 import { useNavigation } from "@react-navigation/native";
+import { useData } from "../context";
+import { AxiosError } from "axios";
+import GoogleAuthButton from "../components/GoogleAuthButton";
 import InputGroup from '../components/InputGroup';
 import SubmitButton from "../components/SubmitButton";
 import Error from "../components/Error";
 
 
-function GoogleBtn() {
-  return (
-  <TouchableOpacity style={styles.btn2}>
-  <FontAwesome name="google" size={24} color="red" style={{marginRight: SIZES.base}}/>
-  <Text style={styles.btn_text}>Sign In with google</Text>
-  </TouchableOpacity>
-  )
-}
-
 export default function SignInScreen() {
   const navigation = useNavigation();
 
+  const {axios, setUser} = useData();
+
   const [isLoading, setLoading] = useState(false);
+
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   const [email, setEmail] = useState("");
 
   const [password, setPassword] = useState("");
 
-  const [error, setError] = useState({msg: "Value currently unavailable.", show: false});
+  const [error, setError] = useState({msg: "", show: false, isError: true});
   
   const HandleNavigation = () => navigation.navigate("Sign-Up" as never);
 
@@ -38,23 +35,64 @@ export default function SignInScreen() {
     return setPassword("");
   }
 
-  const HandleSubmit = () => {
+  const GoogleSubmitCallback = async (data: any) => {
+    
+    setGoogleLoading(false);
+    
+    if (data === false) return setError({msg: "Error signing in", show: true, isError: true});
+    
+    setError({msg: "Logged in", isError: false, show: true});
+    
+    const google_user = {
+      firstname: data.given_name, 
+      lastname: data.family_name, 
+      email: data.email, 
+      _id: data.id
+    }
+    
+    return setTimeout(() => setUser(google_user), 2000);
+
+    // return console.log(data);
+  }
+
+  const HandleSubmit = async () => {
     if (!email.trim() || !password.trim()) 
-      return setError({msg: "Please fill in the required information.", show: true});
+      return setError({msg: "Please fill in the required information.", show: true, isError: true});
+
+    const controller = new AbortController();
+
+    setTimeout(() => controller.abort(), 10000);
 
     setLoading(true);
     
-    setTimeout(() => {
-      console.log({email, password});
+    axios.post("/auth/login/local", {email, password}, {signal: controller.signal})
+    .then((res) => {
+      const data = res.data;
       setLoading(false);
+      if (!data.success) return setError({msg: "Error logging in", show: false, isError: true});
+      const {password, ...signed_user} = data.payload;
       clearForm();
-    }, 5000);
+      return signed_user;
+    })
+    .then((data: any) => {
+      setError({msg: "Login successful", show: true, isError: false});
+      return setTimeout(() => setUser(data), 2000);
+    })
+    .catch((error: AxiosError) => {
+      setLoading(false);
 
-    return setError({msg: "", show: false});
+      if (error.code === "ERR_CANCELED") 
+        return setError({msg: "Request timeout", show: true, isError: true});
+
+      if (error.response?.status === 401) 
+        return setError({msg: "Invalid credentials", show: true, isError: true});
+
+      return setError({msg: error.message, show: true, isError: true});
+    });
   }
 
   useEffect(() => {
-    const timeoutID = setTimeout(() => setError({msg: error.msg, show: false}), 5000);
+    const timeoutID = setTimeout(() => setError({msg: error.msg, show: false, isError: true}), 5000);
     return () => clearTimeout(timeoutID);
   }, [error.show]);
 
@@ -75,7 +113,7 @@ export default function SignInScreen() {
     </TouchableOpacity>
     </View>
 
-    {error.show && <Error msg={error.msg}/>}
+    {error.show && <Error msg={error.msg} isError={error.isError}/>}
 
     <View style={styles.group}>
     <InputGroup title="Email" 
@@ -103,7 +141,10 @@ export default function SignInScreen() {
                   color="black"
                   txtColor="white"
                   />
-    <GoogleBtn />
+    <GoogleAuthButton preFunction={() => setGoogleLoading(true)} 
+                      isLoading={googleLoading} 
+                      callBack={GoogleSubmitCallback}
+                      />
     </View>
 
   </KeyboardAvoidingView>
@@ -137,18 +178,6 @@ const styles = StyleSheet.create({
   group: {
     width: "100%",
     marginTop: SIZES.massive + 20,
-  },
-  btn_text: {
-    fontSize: TEXT.base,
-    fontWeight: "bold"
-  },
-  btn2: {
-    borderWidth: 1, 
-    paddingVertical: SIZES.base + 2, 
-    alignItems: "center", 
-    flexDirection: "row",
-    justifyContent: "center", 
-    marginBottom: SIZES.medium
   },
   btn_box: {
     width: "100%", 

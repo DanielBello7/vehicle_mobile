@@ -5,8 +5,8 @@ import React, { useState, useEffect } from "react";
 import { TouchableWithoutFeedback, ScrollView, View, Text, StatusBar, StyleSheet, TextInput, KeyboardAvoidingView, Keyboard } from "react-native";
 import { SIZES, TEXT } from "../constants";
 import { useData } from "../context";
-import { VehicleDataType } from "../global.types";
 import { REACT_APP_ENCRYPTION_KEY } from '@env';
+import { AxiosError } from "axios";
 import CryptoJS from "react-native-crypto-js";
 import NewCodeModal from "../modules/NewCodeModal";
 import Error from '../components/Error';
@@ -58,7 +58,7 @@ function InputGroup({title, keyType, setValue, textContent, value, disabled}: In
 }
 
 export default function RegistrationScreen() {
-  const {theme, user} = useData();
+  const {theme, user, axios} = useData();
   
   const [firstname, setFirstname] = useState("");
 
@@ -74,7 +74,7 @@ export default function RegistrationScreen() {
 
   const [qrData, setQrData] = useState("");
 
-  const [error, setError] = useState({msg: "Value currently unavailable.", show: false});
+  const [error, setError] = useState({msg: "", show: false});
 
   const clearForm = () => {
     setFirstname("");
@@ -89,35 +89,44 @@ export default function RegistrationScreen() {
     
     setLoading(true);
 
+    const controller = new AbortController();
+
+    setTimeout(() => controller.abort(), 10000);
+
     const today = new Date().toLocaleDateString("en-us", {dateStyle: "full"});
 
-    const new_submission: VehicleDataType = {
-      _id: "aoueoba-aoeubaob-aoeuoa",
-      img: "",
-      dateCreated: today,
+    const new_submission = {
       firstname: firstname,
       lastname: lastname,
       email: email,
       license: license,
-      isVerified: false,
-      registeredBy: user ? user.email : "guest@gmail.com"
+      dateCreated: today,
+      registeredBy: user?.email
     }
 
-    const result = JSON.stringify(new_submission);
-    
-    const newItem = CryptoJS.AES.encrypt(result, REACT_APP_ENCRYPTION_KEY as string).toString();
+    axios.post("/registered/", new_submission, {signal: controller.signal})
+    .then((res) => {
+      const data = res.data;
 
-    setQrData(newItem);
+      if (!data.success) return setError({msg: data.msg, show: true});
+
+      const user = data.payload;
+
+      const result = JSON.stringify(user);
     
-    setTimeout(() => {
+      const newItem = CryptoJS.AES.encrypt(result, REACT_APP_ENCRYPTION_KEY as string).toString();
+      
+      return setQrData(newItem);
+    })
+    .then(() => {
       setShowModal(true);
-      
-      clearForm();
-      
       setLoading(false);
-    }, 2000);
-
-    return setError({msg: error.msg, show: false});
+      return clearForm();
+    })
+    .catch((error: AxiosError) => {
+      setLoading(false);
+      return setError({msg: error.message, show: true});
+    });
   }
 
   useEffect(() => {

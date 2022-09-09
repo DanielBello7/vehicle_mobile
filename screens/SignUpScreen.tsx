@@ -4,6 +4,9 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, Keyboard, StatusBar, StyleSheet, SafeAreaView, KeyboardAvoidingView, TouchableWithoutFeedback, ScrollView } from "react-native";
 import { SIZES, TEXT } from "../constants";
+import { AxiosError } from "axios";
+import { useData } from "../context";
+import { useNavigation } from "@react-navigation/native";
 import SubmitButton from "../components/SubmitButton";
 import InputGroup from "../components/InputGroup";
 import GeneralHeader from "../components/GeneralHeader";
@@ -11,6 +14,10 @@ import Error from "../components/Error";
 
 
 export default function SignUpScreen() {
+  const navigation = useNavigation();
+
+  const {axios, setUser} = useData();
+
   const [isLoading, setLoading] = useState(false);
 
   const [firstname, setFirstname] = useState("");
@@ -23,7 +30,7 @@ export default function SignUpScreen() {
 
   const [confirm, setConfirm] = useState("");
 
-  const [error, setError] = useState({msg: "Value currently unavailable.", show: false});
+  const [error, setError] = useState({msg: "", show: false, isError: true});
 
   const clearForm = () => {
     setFirstname("");
@@ -34,23 +41,45 @@ export default function SignUpScreen() {
   }
 
   const HandleSubmit = () => {
-    if (!firstname.trim() || !lastname.trim() || !email.trim() || !password.trim() || !confirm.trim()) return setError({msg: "Fill in the required information", show: true});
+    if (!firstname.trim() || !lastname.trim() || !email.trim() || !password.trim() || !confirm.trim()) return setError({msg: "Fill in the required information", show: true, isError: true});
 
-    if (password !== confirm) return setError({msg: "Passwords don't match", show: true});
+    if (password !== confirm) return setError({msg: "Passwords don't match", show: true, isError: true});
 
     setLoading(true);
 
-    setTimeout(() => {
-      console.log({firstname, lastname, email, password, confirm });
+    const controller = new AbortController();
+
+    setTimeout(() => controller.abort(), 10000);
+
+    axios.post("/auth/", {firstname, lastname, email, password}, {signal: controller.signal})
+    .then((res) => {
+      const data = res.data;
       setLoading(false);
+      const {password, ...res_user} = data.payload.user;
+      return res_user;
+    })
+    .then((data) => {
       clearForm();
-    }, 5000);
-    
-    return setError({msg: "", show: false});
+      setError({msg: "User registered", show: true, isError: false});
+      setTimeout(() => navigation.goBack(), 2000);
+      return setTimeout(() => setUser(data), 3000);
+    })
+    .catch((error: AxiosError) => {
+      setLoading(false);
+      
+      if (error.code === "ERR_CANCELED") 
+        return setError({msg: "Request timeout", show: true, isError: true});
+
+      if (error.response?.status === 400) 
+        return setError({msg: "Email already registered", show: true, isError: true});
+
+      console.log(error);
+      return setError({msg: error.message, show: true, isError: true});
+    });
   }
 
   useEffect(() => {
-    const timeoutID = setTimeout(() => setError({msg: error.msg, show: false}), 5000);
+    const timeoutID = setTimeout(() => setError({msg: error.msg, show: false, isError: true}), 5000);
     return () => clearTimeout(timeoutID);
   }, [error.show]);
 
@@ -66,7 +95,7 @@ export default function SignUpScreen() {
     <Text style={styles.title}>Sign Up.</Text>
     <Text style={styles.info}>Lorem ipsum dolor sit amet consectetur adipisicing elit.</Text>
 
-    {error.show && <Error msg={error.msg}/>}
+    {error.show && <Error msg={error.msg} isError={error.isError}/>}
 
     <View style={styles.group}>
     <InputGroup title="Firstname"
