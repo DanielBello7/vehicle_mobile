@@ -19,7 +19,7 @@ export default function AboutScreen() {
 
     <View style={styles.sub}>
     <Text style={styles.title}>VVApp.</Text>
-    <Text style={{...styles.sub_title, color: theme.gray}}>Lorem ipsum dolor sit amet</Text>
+    <Text style={{...styles.sub_title, color: theme.gray}}>Visit us at vvapp.com</Text>
     </View>
     
   </SafeAreaView>

@@ -25,9 +25,9 @@ function ScreenInfo() {
   return (
   <View style={styles.screen_box}>
   <Text style={styles.screen_text}>
-  Lorem ipsum dolor sit amet, 
-  consectetur adipisicing elit. 
-  Cum, dicta saepe error officia
+  Please fill in the following 
+  details correctly to create 
+  a registered account.
   </Text>
   </View>
   )

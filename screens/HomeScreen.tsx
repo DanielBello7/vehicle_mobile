@@ -8,6 +8,7 @@ import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from '@expo/vector-icons';
 import { useData } from '../context';
 import { getCameraPermissionsAsync, requestCameraPermissionsAsync } from 'expo-camera';
+import { StatusBar as Status } from 'expo-status-bar'
 import CameraModal from '../modules/CameraModal';
 import Error from '../components/Error';
 
@@ -26,11 +27,8 @@ function TitleBlock() {
   <View style={styles.title_bg}>
     
     <Text style={styles.title_title}>Scan QR Code</Text>
-    
-    <Text style={styles.text_sub}>
-    Lorem ipsum dolor sit amet 
-    consectetur adipisicing elit.
-    </Text>
+
+    <Text style={styles.text_sub}>Scan a registered QR code to procced forward</Text>
   </View>
   </View>
   );
@@ -108,7 +106,7 @@ export default function HomeScreen() {
 
   return (
   <React.Fragment>
-  <StatusBar barStyle="dark-content" />
+  <Status style="dark"/>
   <SafeAreaView style={styles.main}>
   <View style={styles.sub}>
     

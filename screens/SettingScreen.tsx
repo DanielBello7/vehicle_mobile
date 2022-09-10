@@ -50,9 +50,7 @@ function ThemeSelector() {
   </View>
 
   <Text style={styles.info}>
-  Lorem ipsum dolor sit amet consectetur adipisicing elit. 
-  Laborum voluptatibus cumque illum, 
-  quae blanditiis earum reiciendis saepe 
+  You can change the current theme of the app by selecting any of the above listed options. Select the System option to leave the app using the current theme of the phone.
   </Text>
   </View>
   )
@@ -78,8 +76,7 @@ function AppInfo() {
   </View>
 
   <Text style={styles.info}>
-  Lorem ipsum dolor sit amet 
-  consectetur adipisicing
+  For more information visit our website: vvapp.com
   </Text>
   </View>
   )
@@ -110,8 +107,9 @@ function Logout() {
       </View>
 
       <Text style={styles.info}>
-      Lorem ipsum dolor sit amet 
-      consectetur adipisicing
+      Logging out would prevent you from 
+      accessing the app as data 
+      is currently not being retained by the app.
       </Text>      
 
       <View style={styles.logout_box}>

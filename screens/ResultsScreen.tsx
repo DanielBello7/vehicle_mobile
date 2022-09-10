@@ -7,7 +7,7 @@ import { SIZES, TEXT } from "../constants";
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { useData } from '../context';
 import { VehicleDataType } from "../global.types";
-import QRCode from 'react-qr-code';
+import QRCode from 'react-native-qrcode-svg';
 import Spinner from '../components/Spinner';
 
 type DetailValueProps = {
@@ -62,8 +62,7 @@ function Code({data}: CodeProps) {
   return (
   <View style={styles.code_box}>
   <View style={styles.qr_box}>
-  <QRCode value={data} title="VVApp" size={150}/>
-  {/* <AntDesign name="qrcode" size={150}/> */}
+  <QRCode value={data} size={150}/>
   </View>
   </View>
   )

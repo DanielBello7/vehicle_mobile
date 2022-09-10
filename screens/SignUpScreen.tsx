@@ -93,7 +93,9 @@ export default function SignUpScreen() {
   <KeyboardAvoidingView style={styles.sub} behavior="position">
   <ScrollView>
     <Text style={styles.title}>Sign Up.</Text>
-    <Text style={styles.info}>Lorem ipsum dolor sit amet consectetur adipisicing elit.</Text>
+    <Text style={styles.info}>
+    Please fill in all the required information correctly to create an account.
+    </Text>
 
     {error.show && <Error msg={error.msg} isError={error.isError}/>}
 

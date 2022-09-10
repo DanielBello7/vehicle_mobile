@@ -4,11 +4,11 @@
     "slug": "VV-App",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/new_icon.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "image": "./assets/new_splash.png",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "scheme": "VVApp",

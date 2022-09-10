@@ -1,12 +1,13 @@
 
 
 
-import React from "react";
-import { FontAwesome5, AntDesign } from '@expo/vector-icons';
+import React, { useState, useEffect, useRef } from "react";
+import { FontAwesome5, FontAwesome } from '@expo/vector-icons';
 import { Modal, SafeAreaView, View, Text, StatusBar, StyleSheet, TouchableOpacity } from "react-native";
 import { SIZES, TEXT } from "../constants";
+import { requestPermissionsAsync, getPermissionsAsync, saveToLibraryAsync } from 'expo-media-library';
 import { useData } from '../context';
-import QRCode from 'react-qr-code';
+import QRCode from 'react-native-qrcode-svg';
 
 type NewCodeModalProps = {
   data: string,
@@ -15,11 +16,13 @@ type NewCodeModalProps = {
 }
 
 type CodeBoxProps = {
-  data: string
+  data: string,
+  img: any
 }
 
 type OverlayProps = {
-  data: string
+  data: string,
+  img: any
 }
 
 type BackButtonProps = {
@@ -28,6 +31,17 @@ type BackButtonProps = {
 
 type HeaderProps = {
   HeaderFunction: Function
+}
+
+type OptionsProps = {
+  img: any
+}
+
+async function GetURL(item: any): Promise<string> {
+  const a: string = await new Promise((resolve, reject) => {
+    item.toDataURL((data: any) => resolve(data));
+  });
+  return a;
 }
 
 function BackButton({press}: BackButtonProps) {
@@ -48,7 +62,7 @@ function Header({HeaderFunction}: HeaderProps) {
   )
 }
 
-function Overlay({data}: OverlayProps) {
+function Overlay({data, img}: OverlayProps) {
   const { theme } = useData();
 
   return (
@@ -61,8 +75,7 @@ function Overlay({data}: OverlayProps) {
     <View style={{...styles.box4, ...styles.overlay_generic, borderColor: theme.main}}/>
 
     <View style={styles.img_box}>
-    <QRCode value={data} title="VVApp" />
-    {/* <AntDesign name="qrcode" size={300}/> */}
+    <QRCode value={data} size={250} getRef={img} />
     </View>
 
   </View>
@@ -70,22 +83,79 @@ function Overlay({data}: OverlayProps) {
   )
 }
 
-function CodeBox({data}: CodeBoxProps) {
+function Options({img}: OptionsProps) {
+  const {theme} = useData();
+
+  const [message, setMessage] = useState("");
+
+  const [show, setShow] = useState(false);
+  
+  const PermissionConfirm = async () => {
+    const permission = await getPermissionsAsync();
+    if (permission.status === "granted") return true;
+
+    const askPermission = await requestPermissionsAsync();
+    if (askPermission.status === "granted") return true;
+
+    return false;
+  }
+
+  const SaveToPhone = async () => {
+    const permission = await PermissionConfirm();
+    if (!permission) {
+      setMessage("Permissions required!!");
+      return setShow(true);
+    }
+
+    const CodeURL = await GetURL(img.current);
+
+    const imgURI = `data:image/png;base64, ${CodeURL}`;
+
+    const result = await saveToLibraryAsync(imgURI);
+  }
+
+  useEffect(() => {
+    const timeoutID = setTimeout(() => setShow(false), 4000);
+    return () => clearTimeout(timeoutID);
+  }, [show]);
+  
+  return (
+  <View style={styles.cont_main}>
+  <View style={styles.options}>
+  <TouchableOpacity style={{...styles.button, backgroundColor: theme.main}} onPress={SaveToPhone}>
+  <FontAwesome name="download" size={20} color="white"/>
+  </TouchableOpacity>
+
+  <TouchableOpacity style={{...styles.button, backgroundColor: theme.main}}>
+  <FontAwesome name="share-square-o" size={20} color="white"/>
+  </TouchableOpacity>
+  </View>
+
+  {show && <Text style={styles.warning}>{message}</Text>}
+  </View>
+  )
+}
+
+function CodeBox({data, img}: CodeBoxProps) {
   return (
   <View style={styles.code_box}>
   <Text style={styles.info_text}>
-  Lorem ipsum dolor sit 
-  amet consectetur, adipisicing 
-  elit. Voluptas voluptatum 
+  This is your QR Code. 
+  You can download it 
+  or share anywhere.
   </Text>
 
-  <Overlay data={data} />
+  <Overlay data={data} img={img}/>
+
+  <Options img={img}/>
   </View>
   )
 }
 
 export default function NewCodeModal({isVisible, setVisible, data}: NewCodeModalProps) {
   const { theme } = useData();
+
+  const CodeRef = useRef();
 
   return (
   <React.Fragment>
@@ -96,7 +166,7 @@ export default function NewCodeModal({isVisible, setVisible, data}: NewCodeModal
     <Header HeaderFunction={() => setVisible(false)}/>
 
     <View style={styles.sub}>
-    <CodeBox data={data} />
+    <CodeBox data={data} img={CodeRef}/>
     </View>
 
   </SafeAreaView>
@@ -144,7 +214,7 @@ const styles = StyleSheet.create({
   info_text: {
     width: "100%",
     textAlign: "center",
-    fontSize: TEXT.base,
+    fontSize: TEXT.small,
     marginBottom: SIZES.large
   },
   overlay_box: {
@@ -185,12 +255,33 @@ const styles = StyleSheet.create({
   },
   overlay: {
     width: "100%",
-    marginVertical: SIZES.massive,
+    marginTop: SIZES.base,
+    marginBottom: SIZES.massive
   },
   img_box: {
     width: 350,
     height: 350,
     alignItems: "center",
     justifyContent: "center"
+  },
+  options: {
+    width: "60%",
+    alignItems: "center",
+    justifyContent: "space-around",
+    flexDirection: "row"
+  },
+  button: {
+    padding: 15,
+    borderRadius: 500
+  },
+  cont_main: {
+    marginBottom: SIZES.massive,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  warning: {
+    marginTop: SIZES.large,
+    fontSize: TEXT.base,
+    fontWeight: "bold"
   }
-});
+}); 

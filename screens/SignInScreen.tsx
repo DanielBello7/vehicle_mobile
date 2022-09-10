@@ -107,7 +107,7 @@ export default function SignInScreen() {
     <Text style={styles.sub_title}>Sign In</Text>
     
     <View style={styles.info_box}>
-    <Text style={styles.info}>Lorem ipsum dolor sit amet consectetur,</Text>
+    <Text style={styles.info}>Please fill in the details below. No account? </Text>
     <TouchableOpacity style={{marginLeft: 2}} onPress={HandleNavigation}>
     <Text style={styles.signup}>sign up</Text>
     </TouchableOpacity>
