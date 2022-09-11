@@ -7,6 +7,7 @@ import { Modal, SafeAreaView, View, Text, StatusBar, StyleSheet, TouchableOpacit
 import { SIZES, TEXT } from "../constants";
 import { requestPermissionsAsync, getPermissionsAsync, saveToLibraryAsync } from 'expo-media-library';
 import { useData } from '../context';
+import * as fileSystem from 'expo-file-system';
 import QRCode from 'react-native-qrcode-svg';
 
 type NewCodeModalProps = {
@@ -86,9 +87,7 @@ function Overlay({data, img}: OverlayProps) {
 function Options({img}: OptionsProps) {
   const {theme} = useData();
 
-  const [message, setMessage] = useState("");
-
-  const [show, setShow] = useState(false);
+  const [error, setError] = useState({msg: "", show: false});
   
   const PermissionConfirm = async () => {
     const permission = await getPermissionsAsync();
@@ -102,22 +101,25 @@ function Options({img}: OptionsProps) {
 
   const SaveToPhone = async () => {
     const permission = await PermissionConfirm();
-    if (!permission) {
-      setMessage("Permissions required!!");
-      return setShow(true);
-    }
+    
+    if (!permission) return setError({msg: "Permissions required", show: true});
 
-    const CodeURL = await GetURL(img.current);
+    const newCode = await GetURL(img.current);
 
-    const imgURI = `data:image/png;base64, ${CodeURL}`;
+    const path = fileSystem.cacheDirectory + "user-code.png";
 
-    const result = await saveToLibraryAsync(imgURI);
+    Promise.all([
+      fileSystem.writeAsStringAsync(path, newCode, {encoding: 'base64'}),
+      saveToLibraryAsync(path)
+    ])
+    .then(() => setError({msg: "Image saved", show: true}))
+    .catch((error) => setError({msg: error.message, show: true}));
   }
 
   useEffect(() => {
-    const timeoutID = setTimeout(() => setShow(false), 4000);
+    const timeoutID = setTimeout(() => setError({msg: "", show: false}), 4000);
     return () => clearTimeout(timeoutID);
-  }, [show]);
+  }, [error.show]);
   
   return (
   <View style={styles.cont_main}>
@@ -131,7 +133,7 @@ function Options({img}: OptionsProps) {
   </TouchableOpacity>
   </View>
 
-  {show && <Text style={styles.warning}>{message}</Text>}
+  {error.show && <Text style={styles.warning}>{error.msg}</Text>}
   </View>
   )
 }
