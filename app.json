@@ -11,10 +11,7 @@
       "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
-    "scheme": "VVApp",
-    "expo": {
-      "scheme": "VVApp"
-    },
+    "scheme": "vv-app",
     "updates": {
       "fallbackToCacheTimeout": 0
     },
