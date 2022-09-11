@@ -8,6 +8,7 @@ import { SIZES, TEXT } from "../constants";
 import { requestPermissionsAsync, getPermissionsAsync, saveToLibraryAsync } from 'expo-media-library';
 import { useData } from '../context';
 import * as fileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 import QRCode from 'react-native-qrcode-svg';
 
 type NewCodeModalProps = {
@@ -106,13 +107,25 @@ function Options({img}: OptionsProps) {
 
     const newCode = await GetURL(img.current);
 
-    const path = fileSystem.cacheDirectory + "user-code.png";
+    const path = fileSystem.cacheDirectory + `user-code${Math.random()}.png`;
 
-    Promise.all([
-      fileSystem.writeAsStringAsync(path, newCode, {encoding: 'base64'}),
-      saveToLibraryAsync(path)
-    ])
+    fileSystem.writeAsStringAsync(path, newCode, {encoding: 'base64'})
+    .then(() => saveToLibraryAsync(path))
     .then(() => setError({msg: "Image saved", show: true}))
+    .catch((error) => setError({msg: "Error. Try again.", show: true}));
+  }
+
+  const ShareCode = async () => {
+    const permission = await PermissionConfirm();
+
+    if (!permission) return setError({msg: "Permissions required", show: true});
+
+    const code = await GetURL(img.current);
+
+    const path = fileSystem.cacheDirectory + `user-code${Math.random()}.png`;
+
+    fileSystem.writeAsStringAsync(path, code, {encoding: 'base64'})
+    .then(() => Sharing.shareAsync(path))
     .catch((error) => setError({msg: error.message, show: true}));
   }
 
@@ -128,14 +141,14 @@ function Options({img}: OptionsProps) {
   <FontAwesome name="download" size={20} color="white"/>
   </TouchableOpacity>
 
-  <TouchableOpacity style={{...styles.button, backgroundColor: theme.main}}>
+  <TouchableOpacity style={{...styles.button, backgroundColor: theme.main}} onPress={ShareCode}>
   <FontAwesome name="share-square-o" size={20} color="white"/>
   </TouchableOpacity>
   </View>
 
   {error.show && <Text style={styles.warning}>{error.msg}</Text>}
   </View>
-  )
+  );
 }
 
 function CodeBox({data, img}: CodeBoxProps) {

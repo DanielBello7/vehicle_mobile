@@ -36,9 +36,9 @@ function useData() {
 
 function ContextProvider(props: ContextProps) {
 
-  const baseURL = REACT_APP_LOCAL_API_ENDPOINT as string;
+  // const baseURL = REACT_APP_LOCAL_API_ENDPOINT as string;
 
-  // const baseURL = REACT_APP_LIVE_API_ENDPOINT as string;
+  const baseURL = REACT_APP_LIVE_API_ENDPOINT as string;
 
   const axios = Axios.create({baseURL: baseURL, withCredentials: true});
 

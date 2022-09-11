@@ -158,9 +158,9 @@ export default function RegistrationScreen() {
                 disabled={isLoading}
                 />
     <InputGroup title="Email"
-                keyType="email-address"
+                keyType="default"
                 setValue={setEmail}
-                textContent="emailAddress"
+                textContent="none"
                 value={email}
                 disabled={isLoading}
                 />
