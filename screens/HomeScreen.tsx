@@ -8,7 +8,6 @@ import { useNavigation } from "@react-navigation/native";
 import { AntDesign } from '@expo/vector-icons';
 import { useData } from '../context';
 import { getCameraPermissionsAsync, requestCameraPermissionsAsync } from 'expo-camera';
-import { StatusBar as Status } from 'expo-status-bar'
 import CameraModal from '../modules/CameraModal';
 import Error from '../components/Error';
 
@@ -106,8 +105,8 @@ export default function HomeScreen() {
 
   return (
   <React.Fragment>
-  <Status style="dark"/>
   <SafeAreaView style={styles.main}>
+  <StatusBar barStyle={"dark-content"}/>
   <View style={styles.sub}>
     
     {

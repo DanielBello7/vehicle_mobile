@@ -74,6 +74,8 @@ export default function RegistrationScreen() {
 
   const [qrData, setQrData] = useState("");
 
+  const [isActive, setActive] = React.useState(false);
+
   const [error, setError] = useState({msg: "", show: false});
 
   const clearForm = () => {
@@ -129,6 +131,15 @@ export default function RegistrationScreen() {
     });
   }
 
+  React.useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => setActive(true));
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => setActive(false));
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    }
+  }, []);
+
   useEffect(() => {
     const timeoutID = setTimeout(() => setError({msg: error.msg, show: false}), 5000);
     return () => clearTimeout(timeoutID);
@@ -136,9 +147,9 @@ export default function RegistrationScreen() {
 
   return (
   <React.Fragment>
-  <StatusBar barStyle="light-content" />
   <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-  <KeyboardAvoidingView style={styles.main} behavior="position">
+  <KeyboardAvoidingView style={styles.main}>
+  <StatusBar barStyle="dark-content" />
   <ScrollView style={{height: "100%"}} showsVerticalScrollIndicator={false}>
     <ScreenInfo />
 
@@ -182,6 +193,7 @@ export default function RegistrationScreen() {
 
     {error.show && <Error msg={error.msg} />}
     </View>
+    {isActive && <View style={{width: 100, height: 300}}></View>}
   </ScrollView>
   </KeyboardAvoidingView>
   </TouchableWithoutFeedback>

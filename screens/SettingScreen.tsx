@@ -125,9 +125,8 @@ function Logout() {
 
 export default function SettingSceeen() {
   return (
-  <React.Fragment>
-  <StatusBar barStyle="light-content" />
   <ScrollView style={styles.main} showsVerticalScrollIndicator={false}>
+  <StatusBar barStyle="dark-content"/>
     
     <View style={{marginBottom: SIZES.massive}}/>
 
@@ -138,7 +137,6 @@ export default function SettingSceeen() {
     <Logout />
 
   </ScrollView>
-  </React.Fragment>
   )
 }
 

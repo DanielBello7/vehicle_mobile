@@ -11,9 +11,8 @@ export default function AboutScreen() {
   const { theme } = useData();
   
   return (
-  <React.Fragment>
-  <StatusBar barStyle="dark-content" />
   <SafeAreaView style={{...styles.main, backgroundColor: theme.white}}>
+  <StatusBar barStyle="dark-content" />
     <View style={{marginTop: SIZES.large}} />
     <GeneralHeader />
 
@@ -23,7 +22,6 @@ export default function AboutScreen() {
     </View>
     
   </SafeAreaView>
-  </React.Fragment>
   );
 }
 

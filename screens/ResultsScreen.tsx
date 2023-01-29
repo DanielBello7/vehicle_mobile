@@ -154,8 +154,8 @@ export default function MoreDetailsScreen() {
 
   return (
   <React.Fragment>
-  <StatusBar barStyle="light-content" />
   <ScrollView style={styles.main} showsVerticalScrollIndicator={false}>
+  <StatusBar barStyle="dark-content" />
 
     { 
       isLoading ? 

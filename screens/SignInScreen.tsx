@@ -11,6 +11,7 @@ import GoogleAuthButton from "../components/GoogleAuthButton";
 import InputGroup from '../components/InputGroup';
 import SubmitButton from "../components/SubmitButton";
 import Error from "../components/Error";
+import { ScrollView } from "react-native-gesture-handler";
 
 
 export default function SignInScreen() {
@@ -27,6 +28,8 @@ export default function SignInScreen() {
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState({msg: "", show: false, isError: true});
+
+  const [isActive, setActive] = React.useState(false);
   
   const HandleNavigation = () => navigation.navigate("Sign-Up" as never);
 
@@ -91,6 +94,15 @@ export default function SignInScreen() {
     });
   }
 
+  React.useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => setActive(true));
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => setActive(false));
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    }
+  }, []);
+
   useEffect(() => {
     const timeoutID = setTimeout(() => setError({msg: error.msg, show: false, isError: true}), 5000);
     return () => clearTimeout(timeoutID);
@@ -101,8 +113,9 @@ export default function SignInScreen() {
   <StatusBar barStyle="dark-content" />
   <SafeAreaView style={styles.main}>
   <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-  <KeyboardAvoidingView style={styles.sub} behavior="position">
+  <KeyboardAvoidingView style={styles.sub}>
 
+    <ScrollView style={{paddingTop: 100}} showsVerticalScrollIndicator={false}>
     <Text style={styles.title}>VVApp.</Text>
     <Text style={styles.sub_title}>Sign In</Text>
     
@@ -146,7 +159,8 @@ export default function SignInScreen() {
                       callBack={GoogleSubmitCallback}
                       />
     </View>
-
+    {isActive && <View style={{width: 100, height: 500}}></View>}
+    </ScrollView>
   </KeyboardAvoidingView>
   </TouchableWithoutFeedback>
   </SafeAreaView>

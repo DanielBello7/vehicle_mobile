@@ -32,6 +32,8 @@ export default function SignUpScreen() {
 
   const [error, setError] = useState({msg: "", show: false, isError: true});
 
+  const [isActive, setActive] = React.useState(false);
+
   const clearForm = () => {
     setFirstname("");
     setLastname("");
@@ -78,6 +80,15 @@ export default function SignUpScreen() {
     });
   }
 
+  React.useEffect(() => {
+    const showSubscription = Keyboard.addListener('keyboardDidShow', () => setActive(true));
+    const hideSubscription = Keyboard.addListener('keyboardDidHide', () => setActive(false));
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    }
+  }, []);
+
   useEffect(() => {
     const timeoutID = setTimeout(() => setError({msg: error.msg, show: false, isError: true}), 5000);
     return () => clearTimeout(timeoutID);
@@ -90,8 +101,8 @@ export default function SignUpScreen() {
   <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
   <SafeAreaView style={styles.main}>
   <GeneralHeader />
-  <KeyboardAvoidingView style={styles.sub} behavior="position">
-  <ScrollView>
+  <KeyboardAvoidingView style={{...styles.sub}}>
+  <ScrollView showsVerticalScrollIndicator={false}>
     <Text style={styles.title}>Sign Up.</Text>
     <Text style={styles.info}>
     Please fill in all the required information correctly to create an account.
@@ -147,6 +158,7 @@ export default function SignUpScreen() {
                   color="black"
                   txtColor="white"
                   />
+    {isActive && <View style={{width: 100, height: 400}}></View>}
     </View>
   </ScrollView>
   </KeyboardAvoidingView>

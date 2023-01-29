@@ -1,11 +1,12 @@
-
-
-
+import { REACT_APP_LIVE_API, REACT_APP_LOCAL_API } from '@env';
 import React, { useState, useContext } from "react";
-import { UserDataType } from './global.types';
-import { DARK_THEME, LIGHT_THEME, THEME_TYPE } from './constants';
-import { REACT_APP_LIVE_API_ENDPOINT, REACT_APP_LOCAL_API_ENDPOINT } from '@env';
 import Axios, { AxiosInstance } from 'axios';
+import { UserDataType } from './global.types';
+import { 
+  DARK_THEME, 
+  LIGHT_THEME, 
+  THEME_TYPE 
+} from './constants';
 
 type ContextProps = {
   children: React.ReactNode
@@ -36,9 +37,9 @@ function useData() {
 
 function ContextProvider(props: ContextProps) {
 
-  // const baseURL = REACT_APP_LOCAL_API_ENDPOINT as string;
+  // const baseURL = REACT_APP_LOCAL_API as string;
 
-  const baseURL = REACT_APP_LIVE_API_ENDPOINT as string;
+  const baseURL = REACT_APP_LIVE_API as string;
 
   const axios = Axios.create({baseURL: baseURL, withCredentials: true});
 
